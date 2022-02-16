@@ -1,10 +1,11 @@
-# Docker Image Update Checker Action
+# Registry Image Update Checker Action
 
 [![Test](https://github.com/giggio/docker-image-update-checker/actions/workflows/test.yml/badge.svg)](https://github.com/giggio/docker-image-update-checker/actions/workflows/test.yml)
 [![GitHub release badge](https://badgen.net/github/release/giggio/docker-image-update-checker/stable)](https://github.com/giggio/docker-image-update-checker/releases/latest)
 [![GitHub license badge](https://badgen.net/github/license/giggio/docker-image-update-checker)](https://github.com/giggio/docker-image-update-checker/blob/main/LICENSE)
 
-Action to check if the base image was updated and your image (published on DockerHub) needs to be rebuilt. This action will use Docker's API to compare the base layers of your image with the `base-image`, without the need to pull the images.
+Action to check if the base image was updated and your image (published on DockerHub or other registry) needs to be rebuilt.
+This action will use the registry's API to compare the base layers of your image with the `base-image`, without the need to pull the images.
 
 
 ## Inputs
