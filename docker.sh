@@ -66,14 +66,14 @@ getToken() {
 case `awk -F/ '{print NF-1}' <<< "$FULL_BASE"` in
     0) FULL_BASE="index.docker.io/library/$FULL_BASE" ;;
     1)
-        if ! grep -P '(?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$)' <<< "${FULL_BASE%%/*}" > /dev/null; then
+        if ! LC_ALL=en_US.utf8 grep -P '(?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$)' <<< "${FULL_BASE%%/*}" > /dev/null; then
             FULL_BASE="index.docker.io/$FULL_BASE"
         fi ;;
 esac
 case `awk -F/ '{print NF-1}' <<< "$FULL_IMAGE"` in
     0) FULL_IMAGE="index.docker.io/library/$FULL_IMAGE" ;;
     1)
-        if ! grep -P '(?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$)' <<< "${FULL_IMAGE%%/*}" > /dev/null; then
+        if ! LC_ALL=en_US.utf8 grep -P '(?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$)' <<< "${FULL_IMAGE%%/*}" > /dev/null; then
             FULL_IMAGE="index.docker.io/$FULL_IMAGE"
         fi ;;
 esac
