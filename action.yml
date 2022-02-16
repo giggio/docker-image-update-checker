@@ -13,6 +13,10 @@ inputs:
     description: "OS being used, will default to the OS running the action."
     required: false
     default: ""
+  arch:
+    description: "Architecture of the image, used for multiarch images. Like amd64 or arm64. Will default to the OS architecture running the action (limited support)."
+    required: false
+    default: ""
   verbose:
     description: "Show verbose output"
     required: false
@@ -26,7 +30,7 @@ runs:
   steps:
     - id: run-script
       run: |
-        OUTPUT=`FULL_BASE=${{ inputs.base-image }} FULL_IMAGE=${{ inputs.image }} OS=${{ inputs.os }} VERBOSE=${{ inputs.verbose }} $GITHUB_ACTION_PATH/docker.sh`
+        OUTPUT=`FULL_BASE=${{ inputs.base-image }} FULL_IMAGE=${{ inputs.image }} OS=${{ inputs.os }} ARCH=${{ inputs.arch }} VERBOSE=${{ inputs.verbose }} $GITHUB_ACTION_PATH/docker.sh`
         if [ "$?" != "0" ]; then
           >&2 echo "Error running update checker action."
           exit 1

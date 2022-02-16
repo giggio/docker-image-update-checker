@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 
 getLayers() {
+    set -euo pipefail
+
     local REGISTRY=$1
     local REPO=$2
     local DIGEST_LIST=$3
-    local OS=$4
-    local ARCH=$5
+    if [ -z "${4+x}" ]; then
+        local OS=''
+    else
+        local OS=$4
+    fi
+    if [ -z "${5+x}" ]; then
+        local ARCH=''
+    else
+        local ARCH=$5
+    fi
 
     local AUTH=`getToken $REGISTRY $REPO`
     if [ "$AUTH" != "" ]; then
@@ -53,6 +63,8 @@ getLayers() {
 }
 
 getToken() {
+    set -euo pipefail
+
     local REGISTRY=$1
     local REPO=$2
 
@@ -62,6 +74,18 @@ getToken() {
         echo ""
     fi
 }
+
+set -euo pipefail
+
+if [ -z "${ARCH+x}" ]; then
+    ARCH=''
+fi
+if [ -z "${OS+x}" ]; then
+    OS=''
+fi
+if [ -z "${VERBOSE+x}" ]; then
+    VERBOSE=''
+fi
 
 case `awk -F/ '{print NF-1}' <<< "$FULL_BASE"` in
     0) FULL_BASE="index.docker.io/library/$FULL_BASE" ;;
@@ -83,11 +107,13 @@ IMAGE_REPO="${FULL_IMAGE%%/*}"
 IFS=: read BASE BASE_TAG <<< ${FULL_BASE#*/}
 IFS=: read IMAGE IMAGE_TAG <<< ${FULL_IMAGE#*/}
 
+set +e
 LAYERS_BASE=`getLayers $BASE_REPO $BASE ${BASE_TAG:-latest} $OS $ARCH`
 if [ "$?" != "0" ]; then
     >&2 echo "Error getting layers for $FULL_BASE"
     exit 1
 fi
+set -e
 if [ "$LAYERS_BASE" == "" ]; then
     >&2 echo "No layers found for $FULL_BASE"
     exit 1
@@ -102,10 +128,12 @@ if [ "$LAYERS_IMAGE" == "" ]; then
     echo "No layers found for $FULL_IMAGE"
     exit 1
 fi
+set +e
 if [ "$?" != "0" ]; then
     >&2 echo "Error getting layers for $FULL_IMAGE"
     exit 1
 fi
+set -e
 if [ "$VERBOSE" == "true" ]; then
     echo Image: $FULL_IMAGE
     echo Layers:
