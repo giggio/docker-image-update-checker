@@ -1,23 +1,69 @@
 name: Test
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+    tags:
+      - "*"
+  workflow_dispatch:
 
 jobs:
   test:
     name: Test-Action
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-      - name: Test Action
-        id: test
+
+      - name: Test Action with needs updating equals true
+        id: test_needs_updating
         uses: ./
         with:
-          base-image: library/nginx:1.21.0
+          base-image: index.docker.io/library/nginx:1.21.0
+          image: ubuntu
+          verbose: true
+      - name: Get Test Output (needs updating)
+        run: 'echo "Needs updating (should be true): ${{ steps.test_needs_updating.outputs.needs-updating }}"'
+      - name: Check that it needs updating
+        run: echo "Needs updating (as expected)"
+        if: steps.test_needs_updating.outputs.needs-updating == 'true'
+      - name: Should not run (needs updating should be true)
+        run: echo "Does not need updating (unexpected)"; exit 1
+        if: steps.test_needs_updating.outputs.needs-updating == 'false'
+
+      - name: Test Action with needs updating equals false (Linux)
+        id: test_does_not_need_updating_linux
+        uses: ./
+        with:
+          base-image: nginx:1.21.0
           image: nginx/nginx-ingress:1.12.0
-      - name: Get Test Output
-        run: echo "Workflow Docker Image ${{ steps.test.outputs.needs-updating }}"
-      - name: Check value
-        run: echo "Needs updating"
-        if: steps.test.outputs.needs-updating == 'true'
+          verbose: true
+      - name: Get Test Output (Linux)
+        run: 'echo "Needs updating (Linux): ${{ steps.test_does_not_need_updating_linux.outputs.needs-updating }}"'
+      - name: Should not run (needs updating should be false - Linux)
+        run: echo "Needs updating (unexpected)"; exit 1
+        if: steps.test_does_not_need_updating_linux.outputs.needs-updating == 'true'
+      - name: Check that it does not need updating (Linux)
+        run: echo "Does not need updating (as expected)"
+        if: steps.test_does_not_need_updating_linux.outputs.needs-updating == 'false'
+
+      - name: Test Action with needs updating equals false (Windows)
+        id: test_does_not_need_updating_windows
+        uses: ./
+        with:
+          base-image: mcr.microsoft.com/windows/servercore:ltsc2022
+          image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2022
+          verbose: true
+          os: windows
+      - name: Get Test Output (Windows)
+        run: 'echo "Needs updating (Linux): ${{ steps.test_does_not_need_updating_windows.outputs.needs-updating }}"'
+      - name: Should not run (needs updating should be false - Windows)
+        run: echo "Needs updating (unexpected)"; exit 1
+        if: steps.test_does_not_need_updating_windows.outputs.needs-updating == 'true'
+      - name: Check that it does not need updating (Windows)
+        run: echo "Does not need updating (as expected)"
+        if: steps.test_does_not_need_updating_windows.outputs.needs-updating == 'false'

@@ -1,27 +1,44 @@
-name: "Docker Image Update Checker"
-description: "GitHub Action to check if the base Docker image that your image is based on was updated and your image needs to be updated"
-author: Luca Comellini <lucacome>
+name: "Registry Image Update Checker"
+description: "GitHub Action to check if the base container image that your image is based on was updated and your image needs to be updated"
+author: Giovanni Bassi <giggio@giggio.net>
 
 inputs:
   base-image:
-    description: "Docker base image"
+    description: "Container base image"
     required: true
   image:
-    description: "Docker image"
+    description: "Container image"
     required: true
+  os:
+    description: "OS being used, will default to the OS running the action."
+    required: false
+    default: ""
+  verbose:
+    description: "Show verbose output"
+    required: false
+    default: "false"
 outputs:
   needs-updating:
-    description: "True or false"
+    description: "true or false, true if the image needs updating (does not match the base image), false if it does not need updating"
     value: ${{ steps.run-script.outputs.result }}
 runs:
   using: "composite"
   steps:
     - id: run-script
       run: |
-        result=$(base=${{ inputs.base-image }} image=${{ inputs.image }} ${{ github.action_path }}/docker.sh)
-        echo "::set-output name=result::${result}"
+        OUTPUT=`FULL_BASE=${{ inputs.base-image }} FULL_IMAGE=${{ inputs.image }} OS=${{ inputs.os }} VERBOSE=${{ inputs.verbose }} ./docker.sh`
+        if [ "$?" != "0" ]; then
+          >&2 echo "Error running update checker action."
+          exit 1
+        fi
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          echo "`head -n -1 <<< $OUTPUT`"
+          OUTPUT=`tail -n1 <<< $OUTPUT`
+          echo 1, $OUTPUT
+        fi
+        echo "::set-output name=result::$OUTPUT"
       shell: bash
 
 branding:
-  icon: anchor
+  icon: refresh-cw
   color: blue
