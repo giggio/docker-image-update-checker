@@ -26,7 +26,7 @@ runs:
   steps:
     - id: run-script
       run: |
-        OUTPUT=`FULL_BASE=${{ inputs.base-image }} FULL_IMAGE=${{ inputs.image }} OS=${{ inputs.os }} VERBOSE=${{ inputs.verbose }} ./docker.sh`
+        OUTPUT=`FULL_BASE=${{ inputs.base-image }} FULL_IMAGE=${{ inputs.image }} OS=${{ inputs.os }} VERBOSE=${{ inputs.verbose }} $GITHUB_ACTION_PATH/docker.sh`
         if [ "$?" != "0" ]; then
           >&2 echo "Error running update checker action."
           exit 1
@@ -34,7 +34,7 @@ runs:
         if [ "${{ inputs.verbose }}" == "true" ]; then
           echo "`head -n -1 <<< $OUTPUT`"
           OUTPUT=`tail -n1 <<< $OUTPUT`
-          echo 1, $OUTPUT
+          echo needs-updating: $OUTPUT
         fi
         echo "::set-output name=result::$OUTPUT"
       shell: bash

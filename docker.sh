@@ -13,7 +13,6 @@ getLayers() {
     fi
     MANIFESTS=`curl -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST_LIST" 2>/dev/null`
     VERSION=`jq -r .schemaVersion <<< $MANIFESTS`
-    echo 1, $VERSION > /dev/tty
     if [ "$VERSION" == '1' ]; then
         jq -r '.fsLayers[] | .blobSum' <<< $MANIFESTS | tac
     elif [ "$VERSION" == '2' ]; then
