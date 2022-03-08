@@ -3,12 +3,7 @@
 getLayers() {
     set -euo pipefail
 
-    #local REGISTRY=$1
-    #local REPO=$2
-    #local DIGEST_LIST=$3
-    #local FULL_IMAGE_NAME="$REGISTRY/$REPO/$DIGEST_LIST"
     local FULL_IMAGE_NAME=$1
-
     docker inspect $FULL_IMAGE_NAME --format='{{json .RootFS.Layers}}' | jq -r '.[]'
 }
 
