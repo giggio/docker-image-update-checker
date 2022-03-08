@@ -21,6 +21,9 @@ getLayers() {
     if [ "$AUTH" != "" ]; then
         AUTH="Authorization: Bearer $AUTH"
     fi
+    if [ "$VERBOSE" == "true" ]; then
+        echo curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST_LIST"
+    fi
     MANIFESTS=`curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST_LIST"`
     if jq -Mcre '.. | .errors? | select(type == "array" and length != 0)' <<< "$MANIFESTS" > /dev/null; then
         >&2 echo "Error getting manifest for repo $REGISTRY/$REPO:$DIGEST_LIST."
@@ -28,8 +31,14 @@ getLayers() {
     fi
     VERSION=`jq -r .schemaVersion <<< $MANIFESTS`
     if [ "$VERSION" == '1' ]; then
+        if [ "$VERBOSE" == "true" ]; then
+	    echo "Using schema version 1"
+        fi
         jq -r '.fsLayers[] | .blobSum' <<< $MANIFESTS | tac
     elif [ "$VERSION" == '2' ]; then
+        if [ "$VERBOSE" == "true" ]; then
+	    echo "Using schema version 2"
+        fi
         if [ "$OS" == "" ]; then
             if [ `uname` == 'Linux' ]; then
                 OS='linux'
@@ -58,6 +67,9 @@ getLayers() {
             >&2 echo "No manifest found for $OS/$ARCH"
             exit 1
         fi
+        if [ "$VERBOSE" == "true" ]; then
+            echo curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST"
+        fi
         MANIFEST=`curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST"`
         jq -r '.layers[].digest' <<<"$MANIFEST"
     else
@@ -73,6 +85,9 @@ getToken() {
     local REPO=$2
 
     if [ "$REGISTRY" == "index.docker.io" ]; then
+        if [ "$VERBOSE" == "true" ]; then
+            echo curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r '.token'
+        fi
         curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r '.token'
     else
         echo ""
@@ -159,3 +174,4 @@ if [[ "$LAYERS_IMAGE" == "$LAYERS_BASE"* ]]; then
 else
   echo true
 fi
+
