@@ -41,7 +41,7 @@ runs:
           OUTPUT=`tail -n1 <<< $OUTPUT`
           echo needs-updating: $OUTPUT
         fi
-        echo "{result}={$OUTPUT}" >> $GITHUB_OUTPUT
+        echo "result=$OUTPUT" >> $GITHUB_OUTPUT
       shell: bash
 
 branding:
