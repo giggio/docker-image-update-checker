@@ -18,7 +18,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: ShellCheck
         uses: ludeeus/action-shellcheck@master
@@ -47,13 +47,15 @@ jobs:
           image: nginx/nginx-ingress:1.12.0
           verbose: true
       - name: Get Test Output (Linux)
-        run: 'echo "Needs updating (Linux): ${{ steps.test_does_not_need_updating_linux.outputs.needs-updating }}"'
+        run: |
+          echo "Needs updating (Linux): ${{ steps.test_does_not_need_updating_linux.outputs.needs-updating }}"
+          if [ '${{ steps.test_does_not_need_updating_linux.outputs.needs-updating }}' != 'false' ]; then
+              echo "Incorrect output."
+              exit 1
+          fi
       - name: Should not run (needs updating should be false - Linux)
         run: echo "Needs updating (unexpected)"; exit 1
         if: steps.test_does_not_need_updating_linux.outputs.needs-updating == 'true'
-      - name: Check that it does not need updating (Linux)
-        run: echo "Does not need updating (as expected)"
-        if: steps.test_does_not_need_updating_linux.outputs.needs-updating == 'false'
 
       - name: Test Action with needs updating equals false (Windows)
         id: test_does_not_need_updating_windows
@@ -64,10 +66,12 @@ jobs:
           verbose: true
           os: windows
       - name: Get Test Output (Windows)
-        run: 'echo "Needs updating (Linux): ${{ steps.test_does_not_need_updating_windows.outputs.needs-updating }}"'
+        run: |
+          echo "Needs updating (Windows): ${{ steps.test_does_not_need_updating_windows.outputs.needs-updating }}"
+          if [ '${{ steps.test_does_not_need_updating_linux.outputs.needs-updating }}' != 'false' ]; then
+              echo "Incorrect output."
+              exit 1
+          fi
       - name: Should not run (needs updating should be false - Windows)
         run: echo "Needs updating (unexpected)"; exit 1
         if: steps.test_does_not_need_updating_windows.outputs.needs-updating == 'true'
-      - name: Check that it does not need updating (Windows)
-        run: echo "Does not need updating (as expected)"
-        if: steps.test_does_not_need_updating_windows.outputs.needs-updating == 'false'
