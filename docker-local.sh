@@ -4,7 +4,7 @@ getLayers() {
     set -euo pipefail
 
     local FULL_IMAGE_NAME=$1
-    docker inspect $FULL_IMAGE_NAME --format='{{json .RootFS.Layers}}' | jq -r '.[]'
+    docker inspect "$FULL_IMAGE_NAME" --format='{{json .RootFS.Layers}}' | jq -r '.[]'
 }
 
 set -euo pipefail
@@ -30,15 +30,14 @@ esac
 
 BASE_REPO="${FULL_BASE%%/*}"
 IMAGE_REPO="${FULL_IMAGE%%/*}"
-IFS=: read BASE BASE_TAG <<< ${FULL_BASE#*/}
-IFS=: read IMAGE IMAGE_TAG <<< ${FULL_IMAGE#*/}
+IFS=: read BASE BASE_TAG <<< "${FULL_BASE#*/}"
+IFS=: read IMAGE IMAGE_TAG <<< "${FULL_IMAGE#*/}"
 
 if [ "$VERBOSE" == "true" ]; then
-    echo Base image: $FULL_BASE
+    echo Base image: "$FULL_BASE"
 fi
 set +e
-LAYERS_BASE=`getLayers $BASE_REPO/$BASE:${BASE_TAG:-latest}`
-if [ "$?" != "0" ]; then
+if LAYERS_BASE=`getLayers "$BASE_REPO"/"$BASE":"${BASE_TAG:-latest}"`; then
     >&2 echo "Error getting layers for $FULL_BASE."
     exit 1
 fi
@@ -50,10 +49,10 @@ fi
 if [ "$VERBOSE" == "true" ]; then
     echo Layers:
     echo "$LAYERS_BASE"
-    echo Image: $FULL_IMAGE
+    echo Image: "$FULL_IMAGE"
 fi
 set +e
-LAYERS_IMAGE=`getLayers $IMAGE_REPO/$IMAGE:${IMAGE_TAG:-latest}`
+LAYERS_IMAGE=`getLayers "$IMAGE_REPO"/"$IMAGE":"${IMAGE_TAG:-latest}"`
 exitCode=$?
 if [ "$exitCode" != "0" ]; then
     >&2 echo "Error getting layers for $FULL_IMAGE."

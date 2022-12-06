@@ -17,7 +17,8 @@ getLayers() {
         local ARCH=$5
     fi
 
-    local AUTH=`getToken $REGISTRY $REPO`
+    local AUTH
+    AUTH=`getToken "$REGISTRY" "$REPO"`
     if [ "$AUTH" != "" ]; then
         AUTH="Authorization: Bearer $AUTH"
     fi
@@ -29,18 +30,18 @@ getLayers() {
         >&2 echo "Error getting manifest for repo $REGISTRY/$REPO:$DIGEST_LIST."
         exit 64
     fi
-    VERSION=`jq -r .schemaVersion <<< $MANIFESTS`
+    VERSION=`jq -r .schemaVersion <<< "$MANIFESTS"`
     if [ "$VERSION" == '1' ]; then
         if [ "$VERBOSE" == "true" ]; then
 	    echo "Using schema version 1"
         fi
-        jq -r '.fsLayers[] | .blobSum' <<< $MANIFESTS | tac
+        jq -r '.fsLayers[] | .blobSum' <<< "$MANIFESTS" | tac
     elif [ "$VERSION" == '2' ]; then
         if [ "$VERBOSE" == "true" ]; then
 	    echo "Using schema version 2"
         fi
         if [ "$OS" == "" ]; then
-            if [ `uname` == 'Linux' ]; then
+            if [ "`uname`" == 'Linux' ]; then
                 OS='linux'
             else
                 OS='windows'
@@ -62,7 +63,7 @@ getLayers() {
         fi
         export OS=$OS
         export ARCH=$ARCH
-        DIGEST=`jq -r '[ .manifests[] | select( .platform.architecture == env.ARCH and .platform.os == env.OS ) ][0].digest' <<< $MANIFESTS`
+        DIGEST=`jq -r '[ .manifests[] | select( .platform.architecture == env.ARCH and .platform.os == env.OS ) ][0].digest' <<< "$MANIFESTS"`
         if [ "$DIGEST" == "null" ]; then
             >&2 echo "No manifest found for $OS/$ARCH"
             exit 1
@@ -86,7 +87,7 @@ getToken() {
 
     if [ "$REGISTRY" == "index.docker.io" ]; then
         if [ "$VERBOSE" == "true" ]; then
-            echo curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull"
+            echo curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" > "`tty`"
         fi
         curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r '.token'
     else
@@ -123,15 +124,14 @@ esac
 
 BASE_REPO="${FULL_BASE%%/*}"
 IMAGE_REPO="${FULL_IMAGE%%/*}"
-IFS=: read BASE BASE_TAG <<< ${FULL_BASE#*/}
-IFS=: read IMAGE IMAGE_TAG <<< ${FULL_IMAGE#*/}
+IFS=: read BASE BASE_TAG <<< "${FULL_BASE#*/}"
+IFS=: read IMAGE IMAGE_TAG <<< "${FULL_IMAGE#*/}"
 
 if [ "$VERBOSE" == "true" ]; then
-    echo Base image: $FULL_BASE
+    echo Base image: "$FULL_BASE"
 fi
 set +e
-LAYERS_BASE=`getLayers $BASE_REPO $BASE ${BASE_TAG:-latest} $OS $ARCH`
-if [ "$?" != "0" ]; then
+if ! LAYERS_BASE=`getLayers "$BASE_REPO" "$BASE" "${BASE_TAG:-latest}" "$OS" "$ARCH"`; then
     >&2 echo "Error getting layers for $FULL_BASE."
     exit 1
 fi
@@ -143,10 +143,10 @@ fi
 if [ "$VERBOSE" == "true" ]; then
     echo Layers:
     echo "$LAYERS_BASE"
-    echo Image: $FULL_IMAGE
+    echo Image: "$FULL_IMAGE"
 fi
 set +e
-LAYERS_IMAGE=`getLayers $IMAGE_REPO $IMAGE ${IMAGE_TAG:-latest} $OS $ARCH`
+LAYERS_IMAGE=`getLayers "$IMAGE_REPO" "$IMAGE" "${IMAGE_TAG:-latest}" "$OS" "$ARCH"`
 exitCode=$?
 if [ "$exitCode" != "0" ]; then
     >&2 echo "Error getting layers for $FULL_IMAGE."

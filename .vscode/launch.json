@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (dependent images)",
+            "program": "${file}",
+            "env": {
+                "FULL_BASE": "index.docker.io/library/nginx:1.21.0",
+                "FULL_IMAGE": "ubuntu",
+                "VERBOSE": "true"
+            }
+        }
+    ]
+}

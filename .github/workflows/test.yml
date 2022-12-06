@@ -20,6 +20,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: ShellCheck
+        uses: ludeeus/action-shellcheck@master
+
       - name: Test Action with needs updating equals true
         id: test_needs_updating
         uses: ./
