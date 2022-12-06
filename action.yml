@@ -1,3 +1,4 @@
+---
 name: "Registry Image Update Checker"
 description: "GitHub Action to check if the base container image that your image is based on was updated and your image needs to be updated"
 author: Giovanni Bassi <giggio@giggio.net>
@@ -40,7 +41,7 @@ runs:
           OUTPUT=`tail -n1 <<< $OUTPUT`
           echo needs-updating: $OUTPUT
         fi
-        echo "::set-output name=result::$OUTPUT"
+        echo "{result}={$OUTPUT}" >> $GITHUB_OUTPUT
       shell: bash
 
 branding:
