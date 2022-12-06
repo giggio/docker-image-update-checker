@@ -86,7 +86,7 @@ getToken() {
 
     if [ "$REGISTRY" == "index.docker.io" ]; then
         if [ "$VERBOSE" == "true" ]; then
-            echo curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r '.token'
+            echo curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull"
         fi
         curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r '.token'
     else
