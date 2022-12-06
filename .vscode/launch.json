@@ -5,10 +5,21 @@
             "type": "bashdb",
             "request": "launch",
             "name": "Bash-Debug (dependent images)",
-            "program": "${file}",
+            "program": "${workspaceFolder}/docker.sh",
             "env": {
                 "FULL_BASE": "index.docker.io/library/nginx:1.21.0",
                 "FULL_IMAGE": "ubuntu",
+                "VERBOSE": "true"
+            }
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (dependent images 2)",
+            "program": "${workspaceFolder}/docker.sh",
+            "env": {
+                "FULL_BASE": "nginx/nginx-ingress:1.12.0",
+                "FULL_IMAGE": "nginx:1.21.0",
                 "VERBOSE": "true"
             }
         }
