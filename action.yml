@@ -22,6 +22,10 @@ inputs:
     description: "Show verbose output"
     required: false
     default: "false"
+  github_token:
+    description: "Github Token to authenticate against ghcr.io"
+    required: false
+    default: ""
 outputs:
   needs-updating:
     description: "true or false, true if the image needs updating (does not match the base image), false if it does not need updating"
@@ -31,7 +35,7 @@ runs:
   steps:
     - id: run-script
       run: |
-        OUTPUT=`FULL_BASE=${{ inputs.base-image }} FULL_IMAGE=${{ inputs.image }} OS=${{ inputs.os }} ARCH=${{ inputs.arch }} VERBOSE=${{ inputs.verbose }} $GITHUB_ACTION_PATH/docker.sh`
+        OUTPUT=`FULL_BASE=${{ inputs.base-image }} FULL_IMAGE=${{ inputs.image }} OS=${{ inputs.os }} ARCH=${{ inputs.arch }} VERBOSE=${{ inputs.verbose }} GITHUB_TOKEN=${{ inputs.github_token }} $GITHUB_ACTION_PATH/docker.sh`
         if [ "$?" != "0" ]; then
           >&2 echo "Error running update checker action."
           exit 1

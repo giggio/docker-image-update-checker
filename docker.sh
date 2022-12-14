@@ -31,12 +31,13 @@ getLayers() {
         exit 64
     fi
     VERSION=`jq -r .schemaVersion <<< "$MANIFESTS"`
-    if [ "$VERSION" == '1' ]; then
+    MEDIATYPE=`jq -r .mediaType <<< "$MANIFESTS"`
+    if [ "$VERSION" == '1' ] && [ "$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.list.v2+json' ]; then
         if [ "$VERBOSE" == "true" ]; then
             echo "Using schema version 1" > "`tty`"
         fi
         jq -r '.fsLayers[] | .blobSum' <<< "$MANIFESTS" | tac
-    elif [ "$VERSION" == '2' ]; then
+    elif [ "$VERSION" == '2' ] && [ "$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.list.v2+json' ]; then
         if [ "$VERBOSE" == "true" ]; then
             echo "Using schema version 2" > "`tty`"
         fi
@@ -73,8 +74,18 @@ getLayers() {
         fi
         MANIFEST=`curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST"`
         jq -r '.layers[].digest' <<<"$MANIFEST"
+    elif [ "$VERSION" == '2' ] && [ "$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.v2+json' ]; then
+        # ghcr gives us a manifest even though we requested a manifest list
+        # if we don't use the multiarch functionality, this is fine.
+        if [ "$OS" == "" ] && [ "$ARCH" == "" ]; then
+            jq -r '.layers[].digest' <<<"$MANIFESTS"
+        else
+            # such as ghcr.io
+            >&2 echo "Registry of $REGISTRY/$REPO:$DIGEST_LIST does not support manifest lists, which are required for multiarch functionality."
+            exit 1
+        fi
     else
-        >&2 echo "Unknown schema version: $VERSION"
+        >&2 echo "Unknown schema version $VERSION with media type $MEDIATYPE"
         exit 1
     fi
 }
@@ -90,6 +101,8 @@ getToken() {
             echo curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" > "`tty`"
         fi
         curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r '.token'
+    elif [ "$REGISTRY" == "ghcr.io" ]; then
+        echo $GITHUB_TOKEN | base64
     else
         echo ""
     fi
