@@ -23,9 +23,13 @@ getLayers() {
         AUTH="Authorization: Bearer $AUTH"
     fi
     if [ "$VERBOSE" == "true" ]; then
-        echo "curl -s -H \"$AUTH\" -H \"Accept: application/vnd.docker.distribution.manifest.list.v2+json\" \"https://$REGISTRY/v2/$REPO/manifests/$DIGEST_LIST\"" > "`tty`"
+        echo "curl -s -H \"$AUTH\" -H \"Accept: application/vnd.docker.distribution.manifest.list.v2+json;q=0.9, application/vnd.docker.distribution.manifest.v2+json;q=0.8\" \"https://$REGISTRY/v2/$REPO/manifests/$DIGEST_LIST\"" > "`tty`"
     fi
-    MANIFESTS=`curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST_LIST"`
+    # if we request a manifest list from docker hub for an image that is not multi-arch, it will return
+    # a v1 manifest by default; comparison of a v1 manifest of an image to a v2 manifest of a base image indicates
+    # updating is needed even if it should not, so it is better to request a manifest.list if possible and a 
+    # manifest.v2 otherwise. Maybe we should catch comparing v1 to v2 layers alltogether?
+    MANIFESTS=`curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json;q=0.9, application/vnd.docker.distribution.manifest.v2+json;q=0.8" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST_LIST"`
     if jq -Mcre '.. | .errors? | select(type == "array" and length != 0)' <<< "$MANIFESTS" > /dev/null; then
         >&2 echo "Error getting manifest for repo $REGISTRY/$REPO:$DIGEST_LIST."
         exit 64
