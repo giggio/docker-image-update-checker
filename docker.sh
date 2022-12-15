@@ -32,7 +32,7 @@ getLayers() {
     fi
     VERSION=`jq -r .schemaVersion <<< "$MANIFESTS"`
     MEDIATYPE=`jq -r .mediaType <<< "$MANIFESTS"`
-    if [ "$VERSION" == '1' ] && [ "$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.list.v2+json' ]; then
+    if [ "$VERSION" == '1' ] ; then
         if [ "$VERBOSE" == "true" ]; then
             echo "Using schema version 1" > "`tty`"
         fi
