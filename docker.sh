@@ -41,7 +41,7 @@ getLayers() {
             echo "Using schema version 1" > "`tty`"
         fi
         jq -r '.fsLayers[] | .blobSum' <<< "$MANIFESTS" | tac
-    elif [ "$VERSION" == '2' ] && [[ "$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.list.v2+json' ] || [ "$MEDIATYPE" == 'application/vnd.oci.image.index.v1+json' ]]; then
+    elif [[ "$VERSION" == '2'  && ("$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.list.v2+json' || "$MEDIATYPE" == 'application/vnd.oci.image.index.v1+json') ]]; then
         if [ "$VERBOSE" == "true" ]; then
             echo "Using schema version 2" > "`tty`"
         fi
@@ -78,7 +78,7 @@ getLayers() {
         fi
         MANIFEST=`curl -s -H "$AUTH" -H "Accept: application/vnd.docker.distribution.manifest.v2+json;q=0.9, application/vnd.oci.image.manifest.v1+json;q=0.8" "https://$REGISTRY/v2/$REPO/manifests/$DIGEST"`
         jq -r '.layers[].digest' <<<"$MANIFEST"
-    elif [ "$VERSION" == '2' ] && [[ "$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.v2+json' ] || [ "$MEDIATYPE" == 'application/vnd.oci.image.manifest.v1+json' ]]; then
+    elif [[ "$VERSION" == '2' && ("$MEDIATYPE" == 'application/vnd.docker.distribution.manifest.v2+json' || "$MEDIATYPE" == 'application/vnd.oci.image.manifest.v1+json') ]]; then
         # ghcr gives us a manifest even though we requested a manifest list
         # if we don't use the multiarch functionality, this is fine.
         if [ "$OS" == "" ] && [ "$ARCH" == "" ]; then
