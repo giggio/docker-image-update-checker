@@ -36,6 +36,10 @@ getLayers() {
     fi
     VERSION=`jq -r .schemaVersion <<< "$MANIFESTS"`
     MEDIATYPE=`jq -r .mediaType <<< "$MANIFESTS"`
+    if [ "$VERBOSE" == "true" ]; then
+        echo "Fetched MANIFESTS content:" > "`tty`"
+        echo "$MANIFESTS" > "`tty`"
+    fi
     if [ "$VERSION" == '1' ] ; then
         if [ "$VERBOSE" == "true" ]; then
             echo "Using schema version 1" > "`tty`"
