@@ -57,6 +57,24 @@ jobs:
         run: echo "Needs updating (unexpected)"; exit 1
         if: steps.test_does_not_need_updating_linux.outputs.needs-updating == 'true'
 
+      - name: Test Action with needs updating equals true (linux/arm64)
+        id: test_needs_updating_linux_arm64
+        uses: ./
+        with:
+          base-image: index.docker.io/library/nginx:1.21.0
+          image: ubuntu
+          verbose: true
+          os: linux
+          arch: arm64
+      - name: Get Test Output (needs updating)
+        run: 'echo "Needs updating (should be true): ${{ steps.test_needs_updating_linux_arm64.outputs.needs-updating }}"'
+      - name: Check that it needs updating
+        run: echo "Needs updating (as expected)"
+        if: steps.test_needs_updating_linux_arm64.outputs.needs-updating == 'true'
+      - name: Should not run (needs updating should be true)
+        run: echo "Does not need updating (unexpected)"; exit 1
+        if: steps.test_needs_updating_linux_arm64.outputs.needs-updating == 'false'
+
       - name: Test Action with needs updating equals false (Windows)
         id: test_does_not_need_updating_windows
         uses: ./
