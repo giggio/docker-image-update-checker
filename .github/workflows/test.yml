@@ -80,7 +80,8 @@ jobs:
         uses: ./
         with:
           base-image: mcr.microsoft.com/windows/servercore:ltsc2022
-          image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2022
+          # mcr.microsoft.com/windows/servercore/iis:windowsservercore also supports different os versions, which this action doesn't
+          image: mcr.microsoft.com/windows/servercore:ltsc2022-KB5034129
           verbose: true
           os: windows
       - name: Get Test Output (Windows)
