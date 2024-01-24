@@ -106,7 +106,7 @@ getToken() {
         fi
         curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$REPO:pull" | jq -r '.token'
     elif [ "$REGISTRY" == "ghcr.io" ]; then
-        echo $GITHUB_TOKEN | base64
+        echo "$GITHUB_TOKEN" | base64
     else
         echo ""
     fi
