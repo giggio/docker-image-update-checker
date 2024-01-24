@@ -1,7 +1,7 @@
 ---
 name: "Registry Image Update Checker"
 description: "GitHub Action to check if the base container image that your image is based on was updated and your image needs to be updated"
-author: Giovanni Bassi <giggio@giggio.net>
+author: Georg Jung <github-actions@gjung.com>
 
 inputs:
   base-image:
